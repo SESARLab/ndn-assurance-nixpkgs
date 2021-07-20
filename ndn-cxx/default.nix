@@ -1,26 +1,29 @@
-{ lib, stdenv,
-  openssl,
-  doxygen,
-  boost17x,
-  sqlite,
-  pkgconfig,
-  python3,
-  python3Packages,
-  wafHook
+{ lib
+, stdenv
+, openssl
+, doxygen
+, boost17x
+, sqlite
+, pkgconfig
+, python3
+, python3Packages
+, wafHook
+, fetchFromGitHub
 }:
 
 let
   version = "0.7.1";
-  pname = "ndn-cxx-assurance";
+  pname = "ndn-cxx";
   boost = boost17x;
-
 in
-  stdenv.mkDerivation {
+stdenv.mkDerivation {
   inherit pname version;
 
-  src = builtins.fetchGit {
-    url = "git@gitlab.com:ndn-assurance/ndn-cxx.git";
-    ref = "e557f2541c9f5f246669ac84d8bf714cc0829473";
+  src = fetchFromGitHub {
+    owner = "SESARLab";
+    repo = pname;
+    rev = "paper-Security-Certification-Scheme";
+    sha256 = "1dj5v3fi87mavkz7f4kv0cfkav88gj17d170w3jlsiwvyainjbxc";
   };
 
   nativeBuildInputs = [ pkgconfig wafHook doxygen python3 python3Packages.sphinx ];
@@ -64,5 +67,3 @@ in
     maintainers = with maintainers; [ sjmackenzie MostAwesomeDude ];
   };
 }
-
-

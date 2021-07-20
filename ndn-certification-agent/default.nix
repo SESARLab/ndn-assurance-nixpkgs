@@ -1,32 +1,35 @@
-{ lib, stdenv,
-  cargo,
-  ndn-cxx,
-  ndn-tools-assurance,
-  nfd-assurance,
-  rustc,
-  rustPlatform,
+{ lib
+, stdenv
+, cargo
+, ndn-cxx
+, ndn-tools
+, nfd
+, rustc
+, rustPlatform
+, fetchFromGitHub
 }:
 
 let
   ndnsec = "${ndn-cxx}/bin/ndnsec";
-  nfdc = "${nfd-assurance}/bin/nfdc";
-in rustPlatform.buildRustPackage rec {
+  nfdc = "${nfd}/bin/nfdc";
+in
+rustPlatform.buildRustPackage rec {
   version = "1.1.0";
   pname = "ndn-certification-agent";
 
   nativeBuildInputs = [ cargo rustc ];
-  buildInputs = [ ndn-tools-assurance nfd-assurance ];
+  buildInputs = [ ndn-tools nfd ];
 
-  src = builtins.fetchGit {
-    url = "git@gitlab.com:ndn-assurance/ndn-certification-agent.git";
-    ref = "fb19759a321d820d2b8c7d631baac5eee5ddb1db";
+  src = fetchFromGitHub {
+    owner = "SESARLab";
+    repo = pname;
+    rev = "paper-Security-Certification-Scheme";
+    sha256 = "0ya76ym10ziacnalv2niv9wzh1kvspydbiy5fgcccsiyabrkq9g7";
   };
 
   patchPhase = ''
-  	pwd
-  	echo $src
-    substituteInPlace ./src/command/ndnsec/mod.rs --replace /usr/bin/ndnsec ${ndnsec}
-    substituteInPlace ./src/command/nfdc.rs       --replace /usr/bin/nfdc   ${nfdc}
+      substituteInPlace ./src/command/ndnsec/mod.rs --replace /usr/bin/ndnsec ${ndnsec}
+      substituteInPlace ./src/command/nfdc.rs       --replace /usr/bin/nfdc   ${nfdc}
   '';
 
   # postPatch = ''
@@ -48,6 +51,3 @@ in rustPlatform.buildRustPackage rec {
     # maintainers = with maintainers; [ sjmackenzie MostAwesomeDude ];
   };
 }
-
-
-

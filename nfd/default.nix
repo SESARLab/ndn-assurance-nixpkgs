@@ -1,30 +1,39 @@
-{ pkgs ? import <nixpkgs> {},
-  ndn-cxx-assurance ? import ../ndn-cxx {},
-  withSystemd ? true,
-  withWebSocket ? false # FIXME: can't init submodules
+{ pkgs ? import <nixpkgs> {}
+, ndn-cxx
+, withSystemd ? true
+, withWebSocket ? true
+, fetchFromGitHub
 }:
 let
   inherit (pkgs) lib stdenv mkShell fetchgit fetchgitPrivate openssl doxygen boost17x sqlite pkgconfig python3 python3Packages wafHook libpcap systemd;
   inherit (builtins) fetchGit;
-  pname = "nfd-assurance";
+  pname = "nfd";
   version = "0.7.1";
 
-in stdenv.mkDerivation {
+in
+stdenv.mkDerivation {
   inherit pname version;
 
-  src = fetchGit {
-    url = "ssh://git@gitlab.com/ndn-assurance/NFD.git";
-    ref = "6770a23c494c7fb9039461a67987730a6a2fceaa";
+  src = fetchFromGitHub {
+    owner = "SESARLab";
+    repo = pname;
+    rev = "paper-Security-Certification-Scheme";
+    sha256 = "1229sz9d61lns0kxri2y9h2y8sq93hm2smy73l62jicf8i7pwz7l";
+    fetchSubmodules = withWebSocket;
   };
 
   nativeBuildInputs = [
-    wafHook doxygen pkgconfig python3 python3Packages.sphinx
+    wafHook
+    doxygen
+    pkgconfig
+    python3
+    python3Packages.sphinx
   ];
-  buildInputs = [ libpcap boost17x openssl ndn-cxx-assurance ] ++ lib.optional withSystemd systemd;
+  buildInputs = [ libpcap boost17x openssl ndn-cxx ] ++ lib.optional withSystemd systemd;
 
   wafConfigureFlags = [
-     "--boost-includes=${boost17x.dev}/include"
-     "--boost-libs=${boost17x.out}/lib"
+    "--boost-includes=${boost17x.dev}/include"
+    "--boost-libs=${boost17x.out}/lib"
   ] ++ lib.optional (!withWebSocket) "--without-websocket";
 
   # Even though there are binaries, they don't get put in "bin" by default, so
@@ -38,5 +47,3 @@ in stdenv.mkDerivation {
     maintainers = [ maintainers.MostAwesomeDude ];
   };
 }
-
-
